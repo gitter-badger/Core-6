@@ -1,0 +1,30 @@
+{
+    "name": "TrackingTeam/MVC",
+    "type": "project",
+    "description": "TrackingTeam's custom version of a MVC framework",
+    "keywords": [
+        "powerful",
+        "easy",
+        "tracking",
+        "repair",
+        "computers",
+        "pc"
+    ],
+    "homepage": "https://github.com/TrackingTeam/MVC-Framework",
+    "license": "MIT",
+    "require-dev": {
+        "php": ">=5.5.0",
+        "phpmailer/phpmailer": "~5.2",
+        "gregwar/captcha": "~1.0.12",
+        "tracy/tracy": "*",
+        "castle/castle-php": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "": [
+                "application/core/",
+                "application/model/"
+            ]
+        }
+    }
+}
