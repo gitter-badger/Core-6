@@ -21,5 +21,7 @@ if (!file_exists('../vendor/autoload.php')) {
 use Tracy\Debugger;
 
 Debugger::enable();
+
+header(‘Expires: ‘.gmdate(‘D, d M Y H:i:s’, time()+30).’GMT’);
 // start our application\
 new Application();
