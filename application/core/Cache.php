@@ -13,7 +13,7 @@ class Cache {
      * @return bool
      */
     public static function add($key, $value, $minutes = 1) {
-        if (self::has($key)) {
+        if(self::has($key)) {
             return false;
         } else {
             self::put($key, $value, $minutes);
@@ -72,7 +72,7 @@ class Cache {
      */
     public static function get($key, $default = false) {
         $cache = phpFastCache();
-        if ($default !== false && self::has($key) === false) {
+        if($default !== false && self::has($key) === false) {
             return $default;
         } else {
             return $cache->get("$key");

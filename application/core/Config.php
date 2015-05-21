@@ -13,8 +13,8 @@ class Config {
      * @return mixed
      */
     public static function get($key) {
-        if (!Cache::has($key)) {
-            if (self::$getQuery === null) {
+        if(!Cache::has($key)) {
+            if(self::$getQuery === null) {
                 self::$getQuery = DatabaseFactory::getFactory()->getConnection()->prepare("SELECT `value` FROM `settings` WHERE `key` = :key LIMIT 1");
             }
             self::$getQuery->execute(array(':key' => $key));
@@ -34,11 +34,11 @@ class Config {
      * @return bool|int|float|string
      */
     public static function setType($key) {
-        if ($key === 'true') {
+        if($key === 'true') {
             return true;
-        } elseif ($key === 'false') {
+        } elseif($key === 'false') {
             return false;
-        } elseif (is_numeric($key) === true) {
+        } elseif(is_numeric($key) === true) {
             return $key + 0;
         } else {
             return $key;
@@ -51,11 +51,11 @@ class Config {
      * @param $setting
      */
     public static function set($key, $setting) {
-        if (Cache::has($key)) {
+        if(Cache::has($key)) {
             Cache::forget($key);
         }
 
-        if (self::$setQuery === null) {
+        if(self::$setQuery === null) {
             self::$setQuery = DatabaseFactory::getFactory()->getConnection()->prepare("UPDATE settings SET `value` = :setting WHERE `key` = :key");
         }
         self::$setQuery->execute(array(':key' => $key, ':setting' => $setting));

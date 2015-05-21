@@ -15,8 +15,8 @@ class Language {
 
     public static function getText($textID) {
         $userLang = self::getUserLanguage();
-        if (!isset($userLang)) {
-            $language_file = self::getUserLanguage() . $file;
+        if(!isset($userLang)) {
+            $language_file = self::getUserLanguage().$file;
 
         }
     }

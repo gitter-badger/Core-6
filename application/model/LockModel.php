@@ -17,7 +17,7 @@ class LockModel {
         $query = $db->from('user_lock')->where($values);
         $query->execute();
 
-        if (strpos($server_refer, 'lock') !== false) {
+        if(strpos($server_refer, 'lock') !== false) {
             $refer = 'dashboard';
         } else {
             $string = $server_refer;
