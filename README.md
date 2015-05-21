@@ -10,3 +10,4 @@
 - Rename config.example.php to config.development.php
 - Modify config.development.php to connect to the Database you imported the settings.sql into.
 - Develop your application!
+- The [wiki](https://github.com/TrackingTeam/MVC-Framework/wiki) contains more information.

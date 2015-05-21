@@ -327,4 +327,14 @@ class UserModel {
         // return one row (we only have one result or nothing)
         return self::$getDataByIDAndTokenQuery->fetch();
     }
+
+    public static function getUsernameById($user_id) {
+        $db = DatabaseFactory::getFactory()->fluentPDO();
+        $query = $db->from('users')->select('user_name')->where('user_id', $user_id);
+        $result = $query->execute()->fetch();
+        $data = json_decode(json_encode($result), true);
+        return $data['user_name'];
+
+
+    }
 }

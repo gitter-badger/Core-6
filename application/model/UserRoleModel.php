@@ -57,6 +57,7 @@ class UserRoleModel {
             return false;
         }
     }
+
     /**
      * Remove A user permission
      * @param $user_id

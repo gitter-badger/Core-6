@@ -39,6 +39,18 @@ class Session {
     }
 
     /**
+     * gets/returns the value of a specific key of the session
+     *
+     * @param mixed $key Usually a string, right ?
+     * @return mixed the key's value or nothing
+     */
+    public static function get($key) {
+        if (isset($_SESSION[$key])) {
+            return $_SESSION[$key];
+        }
+    }
+
+    /**
      * deletes the session (= logs the user out)
      */
     public static function destroy() {
@@ -54,15 +66,4 @@ class Session {
         return (Session::get('user_logged_in') ? true : false);
     }
 
-    /**
-     * gets/returns the value of a specific key of the session
-     *
-     * @param mixed $key Usually a string, right ?
-     * @return mixed the key's value or nothing
-     */
-    public static function get($key) {
-        if (isset($_SESSION[$key])) {
-            return $_SESSION[$key];
-        }
-    }
 }

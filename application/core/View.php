@@ -63,7 +63,7 @@ class View {
         $navigation_controller = $split_filename[0];
         $navigation_action = $split_filename[1];
 
-        if ($active_controller == $navigation_controller AND $active_action == $navigation_action) {
+        if ($active_controller == $navigation_controller && $active_action == $navigation_action) {
             return true;
         }
 
@@ -144,8 +144,6 @@ class View {
      * renders the feedback messages into the view
      */
     public function renderFeedbackMessages() {
-        // echo out the feedback messages (errors and success messages etc.),
-        // they are in $_SESSION["feedback_positive"] and $_SESSION["feedback_negative"]
         require PATH_VIEW.'_templates/feedback.php';
 
         // delete these messages (as they are not needed anymore and we want to avoid to show them twice

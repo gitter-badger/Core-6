@@ -6,6 +6,7 @@ class IndexController extends Controller {
      */
     public function __construct() {
         parent::__construct();
+        // this entire controller should only be visible/usable by logged in users, so we put authentication-check here
         Auth::checkAuthentication();
     }
 
@@ -14,6 +15,18 @@ class IndexController extends Controller {
      * when user moves to /index or enter your application at base level
      */
     public function index() {
-        $this->View->render('index/index');
+        $this->View->renderWithoutHeaderAndFooter('index/index');
+    }
+
+    /**
+     * Adding both functions as a shortcut.
+     * login and logout redirect to the proper place.
+     */
+    public function logout() {
+        Redirect::to('login/logout');
+    }
+
+    public function login() {
+        Redirect::to('login/login');
     }
 }

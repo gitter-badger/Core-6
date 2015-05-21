@@ -3,9 +3,9 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost:3306
--- Generation Time: May 03, 2015 at 11:42 AM
+-- Generation Time: May 21, 2015 at 02:16 PM
 -- Server version: 5.6.23
--- PHP Version: 5.5.23
+-- PHP Version: 5.5.24
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -17,7 +17,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Database: `bootissuetrack`
+-- Database: `inventorytrack`
 --
 
 -- --------------------------------------------------------
@@ -39,7 +39,8 @@ INSERT INTO `settings` (`key`, `value`) VALUES
 ('CAPTCHA_HEIGHT', '100'),
 ('CAPTCHA_WIDTH', '359'),
 ('CASTLE_ENABLED', 'false'),
-('CASTLE_ID', '941748888865974'),
+  ('CASTLE_ID', 'XXXXXXXXXXXX'),
+  ('CASTLE_SECRET', 'XXXXXXXXXXXXXXXXXXX'),
 ('COOKIE_PATH', '/'),
 ('COOKIE_RUNTIME', '1209600'),
 ('EMAIL_PASSWORD_RESET_CONTENT', 'Please click on this link to reset your password: '),
@@ -65,7 +66,7 @@ INSERT INTO `settings` (`key`, `value`) VALUES
 ('GRAVATAR_RATING', 'pg'),
 ('SITE_DESCRIPTION', 'Issue Tracker'),
 ('SITE_NAME', 'Issue-Track'),
-('USE_GRAVATAR', 'true');
+  ('USE_GRAVATAR', 'false');
 
 --
 -- Indexes for dumped tables

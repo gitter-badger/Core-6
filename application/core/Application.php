@@ -28,7 +28,7 @@ class Application {
         $this->createControllerAndActionNames();
 
         // does such a controller exist ?
-        if(file_exists(PATH_CONTROLLER . $this->controller_name . '.php')) {
+        if (file_exists(PATH_CONTROLLER . $this->controller_name . '.php')) {
 
             // load this file and create this controller
             // example: if controller would be "car", then this line would translate into: $this->car = new car();
@@ -86,7 +86,7 @@ class Application {
         }
 
         // check for action: no action given ? then make action = default action (from config)
-        if(!$this->action_name OR (strlen($this->action_name) == 0)) {
+        if (!$this->action_name or (strlen($this->action_name) == 0)) {
             $this->action_name = DEFAULT_ACTION;
         }
 

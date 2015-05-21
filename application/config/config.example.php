@@ -13,18 +13,19 @@ define('PATH_CONTROLLER', realpath(dirname(__FILE__) . '/../../') . '/applicatio
 define('PATH_VIEW', realpath(dirname(__FILE__) . '/../../') . '/application/view/');
 define('PATH_AVATARS', realpath(dirname(__FILE__) . '/../../') . '/public/avatars/');
 define('PATH_AVATARS_PUBLIC', 'avatars/');
+define('PATH_LANG', realpath(dirname(__FILE__) . '/../../') . '/application/language/');
 /**
  * Define Controller info
  */
-define('DEFAULT_CONTROLLER', 'index');
+define('DEFAULT_CONTROLLER', 'dashboard');
 define('DEFAULT_ACTION', 'index');
 /**
  * Define DB Information (Currently only supports MySQL)
  */
 define('DB_TYPE', 'mysql');
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'pctrack');
-define('DB_USER', 'pctrack');
+define('DB_NAME', 'inventorytrack');
+define('DB_USER', 'inventorytrack');
 define('DB_PASS', 'password');
 define('DB_PORT', '3306');
 define('DB_CHARSET', 'utf8');

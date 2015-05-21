@@ -90,11 +90,9 @@ class RegistrationModel {
         }
 
         // if username, email and password are all correctly validated
-        if (self::validateUserName($user_name) AND self::validateUserEmail($user_email) AND self::validateUserPassword($user_password_new, $user_password_repeat)) {
+        if (self::validateUserName($user_name) && self::validateUserEmail($user_email) && self::validateUserPassword($user_password_new, $user_password_repeat)) {
             return true;
         }
-
-        // otherwise, return false
         return false;
     }
 
@@ -150,7 +148,7 @@ class RegistrationModel {
      * @return bool
      */
     public static function validateUserPassword($user_password_new, $user_password_repeat) {
-        if (empty($user_password_new) OR empty($user_password_repeat)) {
+        if (empty($user_password_new) or empty($user_password_repeat)) {
             Session::add('feedback_negative', Text::get('FEEDBACK_PASSWORD_FIELD_EMPTY'));
             return false;
         }
@@ -180,13 +178,14 @@ class RegistrationModel {
      * @return bool
      */
     public static function writeNewUserToDatabase($user_name, $user_password_hash, $user_email, $user_creation_timestamp, $user_activation_hash) {
+        $language = Language::getDefaultLang();
         $database = DatabaseFactory::getFactory()->getConnection();
 
         // write new users data into database
-        $sql = "INSERT INTO users (user_name, user_password_hash, user_email, user_creation_timestamp, user_activation_hash, user_provider_type)
-                    VALUES (:user_name, :user_password_hash, :user_email, :user_creation_timestamp, :user_activation_hash, :user_provider_type)";
+        $sql = "INSERT INTO users (user_name, user_password_hash, user_email, user_creation_timestamp, user_activation_hash, user_provider_type, user_language)
+                    VALUES (:user_name, :user_password_hash, :user_email, :user_creation_timestamp, :user_activation_hash, :user_provider_type, :user_language)";
         $query = $database->prepare($sql);
-        $query->execute(array(':user_name' => $user_name, ':user_password_hash' => $user_password_hash, ':user_email' => $user_email, ':user_creation_timestamp' => $user_creation_timestamp, ':user_activation_hash' => $user_activation_hash, ':user_provider_type' => 'DEFAULT'));
+        $query->execute(array(':user_name' => $user_name, ':user_password_hash' => $user_password_hash, ':user_email' => $user_email, ':user_creation_timestamp' => $user_creation_timestamp, ':user_activation_hash' => $user_activation_hash, ':user_provider_type' => 'DEFAULT', ':user_language' => $language));
         $count = $query->rowCount();
         if ($count == 1) {
             return true;
@@ -219,7 +218,7 @@ class RegistrationModel {
      * @return boolean gives back true if mail has been sent, gives back false if no mail could been sent
      */
     public static function sendVerificationEmail($user_id, $user_email, $user_activation_hash) {
-        $body = Config::get('EMAIL_VERIFICATION_CONTENT').Config::get('URL').Config::get('EMAIL_VERIFICATION_URL').'/'.urlencode($user_id).'/'.urlencode($user_activation_hash);
+        $body = Config::get('EMAIL_VERIFICATION_CONTENT') . URL . Config::get('EMAIL_VERIFICATION_URL') . '/' . urlencode($user_id) . '/' . urlencode($user_activation_hash);
 
         $mail = new Mail;
         $mail_sent = $mail->sendMail($user_email, Config::get('EMAIL_VERIFICATION_FROM_EMAIL'), Config::get('EMAIL_VERIFICATION_FROM_NAME'), Config::get('EMAIL_VERIFICATION_SUBJECT'), $body);

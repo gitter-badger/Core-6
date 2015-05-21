@@ -3,18 +3,15 @@ language: php
 php:
   - 5.5
   - 5.6
-
+  - hhvm
+  - nightly
 branches:
   only:
     - master
-
 before_script:
-  - pear channel-discover pear.phing.info
-  - pear install phing/phing
-  - pear install phpdoc/phpDocumentor
-  - phpenv rehash
+  - wget https://www.phing.info/get/phing-latest.phar
 script:
-  - phing -f build.xml phplint
+  - php phing-latest.phar -f build.xml phplint
 install:
   - composer self-update
-  - composer install --prefer-source --no-interaction --dev
+  - composer install --prefer-source --no-interaction

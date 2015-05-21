@@ -9,7 +9,9 @@ class ErrorController extends Controller {
      * Construct this object by extending the basic Controller class
      */
     public function __construct() {
+        //@todo add without header and foter to make sure that normal users dont see ui. 
         parent::__construct();
+        Auth::checkAuthentication();
     }
 
     /**

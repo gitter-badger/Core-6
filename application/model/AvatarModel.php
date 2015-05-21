@@ -1,6 +1,8 @@
 <?php
 
 class AvatarModel {
+    public static $writeAvatarToDBQuery = null;
+    public static $deleteAvatarQuery = null;
     /**
      * Gets a gravatar image link from given email address
      *
@@ -29,10 +31,10 @@ class AvatarModel {
      */
     public static function getPublicAvatarFilePathOfUser($user_has_avatar, $user_id) {
         if ($user_has_avatar) {
-            return Config::get('URL').Config::get('PATH_AVATARS_PUBLIC').$user_id.'.jpg';
+            return URL . Config::get('PATH_AVATARS_PUBLIC') . $user_id . '.jpg';
         }
 
-        return Config::get('URL').Config::get('PATH_AVATARS_PUBLIC').Config::get('AVATAR_DEFAULT_IMAGE');
+        return URL . Config::get('PATH_AVATARS_PUBLIC') . Config::get('AVATAR_DEFAULT_IMAGE');
     }
 
     /**
@@ -42,7 +44,7 @@ class AvatarModel {
      */
     public static function createAvatar() {
         // check avatar folder writing rights, check if upload fits all rules
-        if (AvatarModel::isAvatarFolderWritable() AND AvatarModel::validateImageFile()) {
+        if (AvatarModel::isAvatarFolderWritable() && AvatarModel::validateImageFile()) {
 
             // create a jpg file in the avatar folder, write marker to database
             $target_file_path = Config::get('PATH_AVATARS').Session::get('user_id');
@@ -59,7 +61,7 @@ class AvatarModel {
      * @return bool success status
      */
     public static function isAvatarFolderWritable() {
-        if (is_dir(Config::get('PATH_AVATARS')) AND is_writable(Config::get('PATH_AVATARS'))) {
+        if (is_dir(Config::get('PATH_AVATARS')) && is_writable(Config::get('PATH_AVATARS'))) {
             return true;
         }
 
@@ -89,7 +91,7 @@ class AvatarModel {
         $image_proportions = getimagesize($_FILES['avatar_file']['tmp_name']);
 
         // if input file too small
-        if ($image_proportions[0] < Config::get('AVATAR_SIZE') OR $image_proportions[1] < Config::get('AVATAR_SIZE')) {
+        if ($image_proportions[0] < Config::get('AVATAR_SIZE') || $image_proportions[1] < Config::get('AVATAR_SIZE')) {
             Session::add('feedback_negative', Text::get('FEEDBACK_AVATAR_UPLOAD_TOO_SMALL'));
             return false;
         }
@@ -162,10 +164,12 @@ class AvatarModel {
      * @param $user_id
      */
     public static function writeAvatarToDatabase($user_id) {
-        $database = DatabaseFactory::getFactory()->getConnection();
-
-        $query = $database->prepare("UPDATE users SET user_has_avatar = TRUE WHERE user_id = :user_id LIMIT 1");
-        $query->execute(array(':user_id' => $user_id));
+        if (self::$writeAvatarToDBQuery === null) {
+            self::$writeAvatarToDBQuery = DatabaseFactory::getFactory()
+                ->getConnection()
+                ->prepare("UPDATE users SET user_has_avatar = TRUE WHERE user_id = :user_id LIMIT 1");
+        }
+        self::$writeAvatarToDBQuery->execute(array(':user_id' => $user_id));
     }
 
     /**
@@ -174,16 +178,18 @@ class AvatarModel {
      * @return string avatar picture path
      */
     public static function getPublicUserAvatarFilePathByUserId($user_id) {
-        $database = DatabaseFactory::getFactory()->getConnection();
-
-        $query = $database->prepare("SELECT user_has_avatar FROM users WHERE user_id = :user_id LIMIT 1");
-        $query->execute(array(':user_id' => $user_id));
-
+        $query = DatabaseFactory::getFactory()
+            ->fluentPDO()
+            ->from('users')
+            ->select('user_has_avatar')
+            ->where('user_id', $user_id)
+            ->limit(1)
+            ->execute();
         if ($query->fetch()->user_has_avatar) {
-            return Config::get('URL').Config::get('PATH_AVATARS_PUBLIC').$user_id.'.jpg';
+            return URL . Config::get('PATH_AVATARS_PUBLIC') . $user_id . '.jpg';
         }
 
-        return Config::get('URL').Config::get('PATH_AVATARS_PUBLIC').Config::get('AVATAR_DEFAULT_IMAGE');
+        return URL . Config::get('PATH_AVATARS_PUBLIC') . Config::get('AVATAR_DEFAULT_IMAGE');
     }
 
     /**
@@ -201,11 +207,13 @@ class AvatarModel {
         // try to delete image, but still go on regardless of file deletion result
         self::deleteAvatarImageFile($userId);
 
-        $database = DatabaseFactory::getFactory()->getConnection();
-
-        $sth = $database->prepare("UPDATE users SET user_has_avatar = 0 WHERE user_id = :user_id LIMIT 1");
-        $sth->bindValue(":user_id", (int)$userId, PDO::PARAM_INT);
-        $sth->execute();
+        if (self::$deleteAvatarQuery === null) {
+            self::$deleteAvatarQuery = DatabaseFactory::getFactory()
+                ->getConnection()
+                ->prepare("UPDATE users SET user_has_avatar = 0 WHERE user_id = :user_id LIMIT 1");
+        }
+        self::$deleteAvatarQuery->bindValue(":user_id", (int)$userId, PDO::PARAM_INT);
+        self::$deleteAvatarQuery->execute();
 
         if ($sth->rowCount() == 1) {
             Session::set('user_avatar_file', self::getPublicUserAvatarFilePathByUserId($userId));
@@ -225,13 +233,13 @@ class AvatarModel {
      */
     public static function deleteAvatarImageFile($userId) {
         // Check if file exists
-        if (!file_exists(Config::get('PATH_AVATARS').$userId.".jpg")) {
+        if (!file_exists(Config::get('PATH_AVATARS') . $userId . ".jpg")) {
             Session::add("feedback_negative", Text::get("FEEDBACK_AVATAR_IMAGE_DELETE_NO_FILE"));
             return false;
         }
 
         // Delete avatar file
-        if (!unlink(Config::get('PATH_AVATARS').$userId.".jpg")) {
+        if (!unlink(Config::get('PATH_AVATARS') . $userId . ".jpg")) {
             Session::add("feedback_negative", Text::get("FEEDBACK_AVATAR_IMAGE_DELETE_FAILED"));
             return false;
         }

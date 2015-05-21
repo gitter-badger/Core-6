@@ -12,6 +12,7 @@ class LoginController extends Controller {
      */
     public function __construct() {
         parent::__construct();
+        // no auth check here, it would create a infinite loop
     }
 
     /**
@@ -22,7 +23,7 @@ class LoginController extends Controller {
         if (LoginModel::isUserLoggedIn()) {
             Redirect::home();
         } else {
-            $this->View->render('login/index');
+            $this->View->renderWithoutHeaderAndFooter('login/index');
         }
     }
 
@@ -31,7 +32,9 @@ class LoginController extends Controller {
      */
     public function login() {
         // perform the login method, put result (true or false) into $login_successful
-        $login_successful = LoginModel::login(Request::post('user_name'), Request::post('user_password'), Request::post('set_remember_me_cookie'));
+        $login_successful = LoginModel::login(
+            Request::post('user_name'), Request::post('user_password'), Request::post('set_remember_me_cookie')
+        );
 
         // check login status: if true, then redirect user login/showProfile, if false, then to login form again
         if ($login_successful) {
@@ -48,6 +51,15 @@ class LoginController extends Controller {
     public function logout() {
         LoginModel::logout();
         Redirect::home();
+    }
+
+    /**
+     * Lock function
+     * set lock to true in the cookie, refer to lock page.
+     */
+    public function lock() {
+        Session::set('locked', true);
+        $this->View->renderWithoutHeaderAndFooter('login/locked');
     }
 
     /**
@@ -73,7 +85,13 @@ class LoginController extends Controller {
      */
     public function showProfile() {
         Auth::checkAuthentication();
-        $this->View->render('login/showProfile', array('user_name' => Session::get('user_name'), 'user_email' => Session::get('user_email'), 'user_gravatar_image_url' => Session::get('user_gravatar_image_url'), 'user_avatar_file' => Session::get('user_avatar_file'), 'user_account_type' => Session::get('user_account_type')));
+        $this->View->render('login/showProfile', array(
+            'user_name' => Session::get('user_name'),
+            'user_email' => Session::get('user_email'),
+            'user_gravatar_image_url' => Session::get('user_gravatar_image_url'),
+            'user_avatar_file' => Session::get('user_avatar_file'),
+            'user_account_type' => Session::get('user_account_type')
+        ));
     }
 
     /**
@@ -121,7 +139,9 @@ class LoginController extends Controller {
      */
     public function editAvatar() {
         Auth::checkAuthentication();
-        $this->View->render('login/editAvatar', array('avatar_file_path' => AvatarModel::getPublicUserAvatarFilePathByUserId(Session::get('user_id'))));
+        $this->View->render('login/editAvatar', array(
+            'avatar_file_path' => AvatarModel::getPublicUserAvatarFilePathByUserId(Session::get('user_id'))
+        ));
     }
 
     /**
@@ -146,36 +166,6 @@ class LoginController extends Controller {
     }
 
     /**
-     * Show the change-account-type page
-     * Auth::checkAuthentication() makes sure that only logged in users can use this action and see this page
-     */
-    public function changeUserRole() {
-        Auth::checkAuthentication();
-        $this->View->render('login/changeUserRole');
-    }
-
-    /**
-     * Perform the account-type changing
-     * Auth::checkAuthentication() makes sure that only logged in users can use this action
-     * POST-request
-     */
-    public function changeUserRole_action() {
-        Auth::checkAuthentication();
-
-        if (Request::post('user_account_upgrade')) {
-            // "2" is quick & dirty account type 2, something like "premium user" maybe. you got the idea :)
-            UserRoleModel::changeUserRole(2);
-        }
-
-        if (Request::post('user_account_downgrade')) {
-            // "1" is quick & dirty account type 1, something like "basic user" maybe.
-            UserRoleModel::changeUserRole(1);
-        }
-
-        Redirect::to('login/changeUserRole');
-    }
-
-    /**
      * Register page
      * Show the register form, but redirect to main-page if user is already logged-in
      */
@@ -183,7 +173,7 @@ class LoginController extends Controller {
         if (LoginModel::isUserLoggedIn()) {
             Redirect::home();
         } else {
-            $this->View->render('login/register');
+            $this->View->renderWithoutHeaderAndFooter('login/register');
         }
     }
 
@@ -219,7 +209,7 @@ class LoginController extends Controller {
      * Show the request-password-reset page
      */
     public function requestPasswordReset() {
-        $this->View->render('login/requestPasswordReset');
+        $this->View->renderWithoutHeaderAndFooter('login/requestPasswordReset');
     }
 
     /**
@@ -240,7 +230,10 @@ class LoginController extends Controller {
         // check if this the provided verification code fits the user's verification code
         if (PasswordResetModel::verifyPasswordReset($user_name, $verification_code)) {
             // pass URL-provided variable to view to display them
-            $this->View->render('login/changePassword', array('user_name' => $user_name, 'user_password_reset_hash' => $verification_code));
+            $this->View->render('login/changePassword', array(
+                'user_name' => $user_name,
+                'user_password_reset_hash' => $verification_code
+            ));
         } else {
             Redirect::to('login/index');
         }
@@ -255,7 +248,10 @@ class LoginController extends Controller {
      * TODO this is an _action
      */
     public function setNewPassword() {
-        PasswordResetModel::setNewPassword(Request::post('user_name'), Request::post('user_password_reset_hash'), Request::post('user_password_new'), Request::post('user_password_repeat'));
+        PasswordResetModel::setNewPassword(
+            Request::post('user_name'), Request::post('user_password_reset_hash'),
+            Request::post('user_password_new'), Request::post('user_password_repeat')
+        );
         Redirect::to('login/index');
     }
 
@@ -268,7 +264,6 @@ class LoginController extends Controller {
      * Maybe refactor this sometime.
      */
     public function showCaptcha() {
-        header('Content-Type: image/jpeg');
         CaptchaModel::generateAndShowCaptcha();
     }
 }

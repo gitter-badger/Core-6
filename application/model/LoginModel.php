@@ -21,7 +21,7 @@ class LoginModel {
      */
     public static function login($user_name, $user_password, $set_remember_me_cookie = null) {
         // we do negative-first checks here, for simplicity empty username and empty password in one line
-        if(empty($user_name) OR empty($user_password)) {
+        if (empty($user_name) or empty($user_password)) {
             Session::add('feedback_negative', Text::get('FEEDBACK_USERNAME_OR_PASSWORD_FIELD_EMPTY'));
             return false;
         }
@@ -49,9 +49,13 @@ class LoginModel {
         // successfully logged in, so we write all necessary data into the session and set "user_logged_in" to true
         self::setSuccessfulLoginIntoSession($result->user_id, $result->user_name, $result->user_email, $result->user_account_type);
 
-        if(Config::get('CASTLE_ENABLED') == 'true') {
-            Castle::setApiKey(Config::get('CASTLE_ID'));
-            Castle::login($result->user_id, array('email' => $result->user_email, 'name' => $result->user_name));
+        if (Config::get('CASTLE_ENABLED')) {
+            Castle::setApiKey(Config::get('CASTLE_SECRET'));
+            Castle::track(array(
+                    'name' => '$login.succeeded',
+                    'user_id' => $result->user_id
+                )
+            );
         }
         // return true to make clear the login was successful
         // maybe do this in dependence of setSuccessfulLoginIntoSession ?
@@ -78,7 +82,7 @@ class LoginModel {
         }
 
         // block login attempt if somebody has already failed 3 times and the last login attempt is less than 30sec ago
-        if(($result->user_failed_logins >= 3) AND ($result->user_last_failed_login > (time() - 30))) {
+        if (($result->user_failed_logins >= 3) && ($result->user_last_failed_login > (time() - 30))) {
             Session::add('feedback_negative', Text::get('FEEDBACK_PASSWORD_WRONG_3_TIMES'));
             return false;
         }
@@ -88,15 +92,44 @@ class LoginModel {
             self::incrementFailedLoginCounterOfUser($result->user_name);
             // we say "password wrong" here, but less details like "login failed" would be better (= less information)
             Session::add('feedback_negative', Text::get('FEEDBACK_PASSWORD_WRONG'));
+            if (Config::get('CASTLE_ENABLED')) {
+                Castle::setApiKey(Config::get('CASTLE_SECRET'));
+                Castle::track(array(
+                    'name' => '$login.failed',
+                    'details' => array(
+                        '$login' => $result->user_email,
+                        '$reason' => 'Password Incorrect'
+                    )
+                ));
+            }
             return false;
         }
 
         // if user is not active (= has not verified account by verification mail)
         if($result->user_active != 1) {
             Session::add('feedback_negative', Text::get('FEEDBACK_ACCOUNT_NOT_ACTIVATED_YET'));
+            if (Config::get('CASTLE_ENABLED')) {
+                Castle::setApiKey(Config::get('CASTLE_SECRET'));
+                Castle::track(array(
+                    'name' => '$login.failed',
+                    'details' => array(
+                        '$login' => $result->user_email,
+                        '$reason' => 'Account not Activated'
+                    )
+                ));
+            }
             return false;
         }
-
+        if (Config::get('CASTLE_ENABLED')) {
+            Castle::setApiKey(Config::get('CASTLE_SECRET'));
+            Castle::login(
+                $result->user_id,
+                array(
+                    'username' => $result->user_name,
+                    'email' => $result->user_email
+                )
+            );
+        }
         return $result;
     }
 
@@ -116,7 +149,7 @@ class LoginModel {
 
         // check cookie's contents, check if cookie contents belong together or token is empty
         list ($user_id, $token, $hash) = explode(':', $cookie);
-        if($hash !== hash('sha256', $user_id . ':' . $token) OR empty($token)) {
+        if ($hash !== hash('sha256', $user_id . ':' . $token) or empty($token)) {
             Session::add('feedback_negative', Text::get('FEEDBACK_COOKIE_INVALID'));
             return false;
         }
@@ -141,12 +174,16 @@ class LoginModel {
      * Log out process: delete cookie, delete session
      */
     public static function logout() {
+        if (Config::get('CASTLE_ENABLED')) {
+            Castle::setApiKey(Config::get('CASTLE_SECRET'));
+            Castle::logout();
+            Castle::track(array(
+                'name' => '$logout.succeeded',
+                'user_id' => Session::get('user_id')
+            ));
+        }
         self::deleteCookie();
         Session::destroy();
-        if(Config::get('CASTLE_ENABLED') == 'true') {
-            Castle::setApiKey(Config::get('CASTLE_ID'));
-            Castle::logout();
-        }
     }
 
     /**
@@ -172,6 +209,7 @@ class LoginModel {
 
         // finally, set user as logged-in
         Session::set('user_logged_in', true);
+        Session::set('locked', 0);
     }
 
     /**
@@ -262,4 +300,5 @@ class LoginModel {
     public static function isUserLoggedIn() {
         return Session::userIsLoggedIn();
     }
+
 }
