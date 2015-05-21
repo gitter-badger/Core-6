@@ -18,14 +18,14 @@ class PasswordResetModel {
      * @return bool success status
      */
     public static function requestPasswordReset($user_name_or_email) {
-        if (empty($user_name_or_email)) {
+        if(empty($user_name_or_email)) {
             Session::add('feedback_negative', Text::get('FEEDBACK_USERNAME_EMAIL_FIELD_EMPTY'));
             return false;
         }
 
         // check if that username exists
         $result = UserModel::getUserDataByUserNameOrEmail($user_name_or_email);
-        if (!$result) {
+        if(!$result) {
             Session::add('feedback_negative', Text::get('FEEDBACK_USER_DOES_NOT_EXIST'));
             return false;
         }
@@ -37,13 +37,13 @@ class PasswordResetModel {
 
         // set token (= a random hash string and a timestamp) into database ...
         $token_set = PasswordResetModel::setPasswordResetDatabaseToken($result->user_name, $user_password_reset_hash, $temporary_timestamp);
-        if (!$token_set) {
+        if(!$token_set) {
             return false;
         }
 
         // ... and send a mail to the user, containing a link with username and token hash string
         $mail_sent = PasswordResetModel::sendPasswordResetMail($result->user_name, $user_password_reset_hash, $result->user_email);
-        if ($mail_sent) {
+        if($mail_sent) {
             return true;
         }
 
@@ -61,7 +61,7 @@ class PasswordResetModel {
      * @return bool success status
      */
     public static function setPasswordResetDatabaseToken($user_name, $user_password_reset_hash, $temporary_timestamp) {
-        if (self::$setPasswordResetToken === null) {
+        if(self::$setPasswordResetToken === null) {
             self::$setPasswordResetToken = DatabaseFactory::getFactory()
                 ->getConnection()
                 ->prepare("UPDATE users
@@ -71,7 +71,7 @@ class PasswordResetModel {
         self::$setPasswordResetToken->execute(array(':user_password_reset_hash' => $user_password_reset_hash, ':user_name' => $user_name, ':user_password_reset_timestamp' => $temporary_timestamp, ':provider_type' => 'DEFAULT'));
 
         // check if exactly one row was successfully changed
-        if (self::$setPasswordResetToken->rowCount() == 1) {
+        if(self::$setPasswordResetToken->rowCount() == 1) {
             return true;
         }
 
@@ -91,18 +91,18 @@ class PasswordResetModel {
      */
     public static function sendPasswordResetMail($user_name, $user_password_reset_hash, $user_email) {
         // create email body
-        $body = Config::get('EMAIL_PASSWORD_RESET_CONTENT') . ' ' . URL . Config::get('EMAIL_PASSWORD_RESET_URL') . '/' . urlencode($user_name) . '/' . urlencode($user_password_reset_hash);
+        $body = Config::get('EMAIL_PASSWORD_RESET_CONTENT').' '.URL.Config::get('EMAIL_PASSWORD_RESET_URL').'/'.urlencode($user_name).'/'.urlencode($user_password_reset_hash);
 
         // create instance of Mail class, try sending and check
         $mail = new Mail;
         $mail_sent = $mail->sendMail($user_email, Config::get('EMAIL_PASSWORD_RESET_FROM_EMAIL'), Config::get('EMAIL_PASSWORD_RESET_FROM_NAME'), Config::get('EMAIL_PASSWORD_RESET_SUBJECT'), $body);
 
-        if ($mail_sent) {
+        if($mail_sent) {
             Session::add('feedback_positive', Text::get('FEEDBACK_PASSWORD_RESET_MAIL_SENDING_SUCCESSFUL'));
             return true;
         }
 
-        Session::add('feedback_negative', Text::get('FEEDBACK_PASSWORD_RESET_MAIL_SENDING_ERROR') . $mail->getError());
+        Session::add('feedback_negative', Text::get('FEEDBACK_PASSWORD_RESET_MAIL_SENDING_ERROR').$mail->getError());
         return false;
     }
 
@@ -113,7 +113,7 @@ class PasswordResetModel {
      * @return bool Success status
      */
     public static function verifyPasswordReset($user_name, $verification_code) {
-        if (self::$verifyPasswordQuery) {
+        if(self::$verifyPasswordQuery) {
             self::$verifyPasswordQuery = DatabaseFactory::getFactory()
                 ->getConnection()
                 ->prepare("SELECT user_id, user_password_reset_timestamp
@@ -126,7 +126,7 @@ class PasswordResetModel {
         self::$verifyPasswordQuery->execute(array(':user_password_reset_hash' => $verification_code, ':user_name' => $user_name, ':user_provider_type' => 'DEFAULT'));
 
         // if this user with exactly this verification hash code does NOT exist
-        if (self::$verifyPasswordQuery->rowCount() != 1) {
+        if(self::$verifyPasswordQuery->rowCount() != 1) {
             Session::add('feedback_negative', Text::get('FEEDBACK_PASSWORD_RESET_COMBINATION_DOES_NOT_EXIST'));
             return false;
         }
@@ -138,7 +138,7 @@ class PasswordResetModel {
         $timestamp_one_hour_ago = time() - 3600;
 
         // if password reset request was sent within the last hour (this timeout is for security reasons)
-        if ($result_user_row->user_password_reset_timestamp > $timestamp_one_hour_ago) {
+        if($result_user_row->user_password_reset_timestamp > $timestamp_one_hour_ago) {
             // verification was successful
             Session::add('feedback_positive', Text::get('FEEDBACK_PASSWORD_RESET_LINK_VALID'));
             return true;
@@ -163,7 +163,7 @@ class PasswordResetModel {
      */
     public static function setNewPassword($user_name, $user_password_reset_hash, $user_password_new, $user_password_repeat) {
         // validate the password
-        if (!self::validateNewPassword($user_name, $user_password_reset_hash, $user_password_new, $user_password_repeat)) {
+        if(!self::validateNewPassword($user_name, $user_password_reset_hash, $user_password_new, $user_password_repeat)) {
             return false;
         }
 
@@ -171,7 +171,7 @@ class PasswordResetModel {
         $user_password_hash = password_hash($user_password_new, PASSWORD_DEFAULT);
 
         // write the password to database (as hashed and salted string), reset user_password_reset_hash
-        if (PasswordResetModel::saveNewUserPassword($user_name, $user_password_hash, $user_password_reset_hash)) {
+        if(PasswordResetModel::saveNewUserPassword($user_name, $user_password_hash, $user_password_reset_hash)) {
             Session::add('feedback_positive', Text::get('FEEDBACK_PASSWORD_CHANGE_SUCCESSFUL'));
             return true;
         } else {
@@ -191,19 +191,19 @@ class PasswordResetModel {
      * @return bool
      */
     public static function validateNewPassword($user_name, $user_password_reset_hash, $user_password_new, $user_password_repeat) {
-        if (empty($user_name)) {
+        if(empty($user_name)) {
             Session::add('feedback_negative', Text::get('FEEDBACK_USERNAME_FIELD_EMPTY'));
             return false;
-        } else if (empty($user_password_reset_hash)) {
+        } else if(empty($user_password_reset_hash)) {
             Session::add('feedback_negative', Text::get('FEEDBACK_PASSWORD_RESET_TOKEN_MISSING'));
             return false;
-        } else if (empty($user_password_new) || empty($user_password_repeat)) {
+        } else if(empty($user_password_new) || empty($user_password_repeat)) {
             Session::add('feedback_negative', Text::get('FEEDBACK_PASSWORD_FIELD_EMPTY'));
             return false;
-        } else if ($user_password_new !== $user_password_repeat) {
+        } else if($user_password_new !== $user_password_repeat) {
             Session::add('feedback_negative', Text::get('FEEDBACK_PASSWORD_REPEAT_WRONG'));
             return false;
-        } else if (strlen($user_password_new) < 6) {
+        } else if(strlen($user_password_new) < 6) {
             Session::add('feedback_negative', Text::get('FEEDBACK_PASSWORD_TOO_SHORT'));
             return false;
         }
@@ -221,7 +221,7 @@ class PasswordResetModel {
      * @return bool
      */
     public static function saveNewUserPassword($user_name, $user_password_hash, $user_password_reset_hash) {
-        if (self::$saveNewPasswordQuery === null) {
+        if(self::$saveNewPasswordQuery === null) {
             self::$saveNewPasswordQuery = DatabaseFactory::getFactory()
                 ->getConnection()
                 ->prepare("UPDATE users SET user_password_hash = :user_password_hash, user_password_reset_hash = NULL,

@@ -5,7 +5,7 @@
 
     $register_allow = true;
 
-    if ($register_allow) {
+    if($register_allow) {
     ?>
 
     <!-- login box on left side -->

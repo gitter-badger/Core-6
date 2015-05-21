@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <?php if (Config::get('CASTLE_ENABLED')) { ?>
+    <?php if(Config::get('CASTLE_ENABLED')) { ?>
         <script type="text/javascript">
             (function (e, t, n, r) {
                 function i(e, n) {
