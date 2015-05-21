@@ -1,0 +1,5 @@
+{
+  "login-failed": "Login Failed: Check your username and password!",
+  "login-success": "Login Succeeded!",
+  "login-error": "Something went wrong on our end when trying to log you in."
+}
