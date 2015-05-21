@@ -26,7 +26,7 @@ class ProfileController extends Controller {
      * @param $user_id int id the the user
      */
     public function showProfile($user_id) {
-        if (isset($user_id)) {
+        if(isset($user_id)) {
             $this->View->render('profile/showProfile', array(
                     'user' => UserModel::getPublicProfileOfUser($user_id))
             );

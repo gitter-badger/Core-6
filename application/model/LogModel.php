@@ -29,12 +29,12 @@ class LogModel {
      * @return object a single object (the result)
      */
     public static function getActivity($user_id) {
-        if (self::$getActivityQuery === null) {
+        if(self::$getActivityQuery === null) {
             self::$getActivityQuery = DatabaseFactory::getFactory()
                 ->getConnection()
                 ->prepare("SELECT * FROM log WHERE user_id = :user_id ");
         }
-        self::$getActivityQuery->execute(array(':user_id' => (int)$user_id));
+        self::$getActivityQuery->execute(array(':user_id' => (int) $user_id));
 
         return self::$getActivityQuery->fetchAll(PDO::FETCH_ASSOC);
     }
