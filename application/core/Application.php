@@ -36,8 +36,8 @@ class Application {
             $this->controller = new $this->controller_name();
 
             // check for method: does such a method exist in the controller ?
-            if(method_exists($this->controller, $this->action_name)) {
-                if(!empty($this->parameters)) {
+            if (method_exists($this->controller, $this->action_name)) {
+                if (!empty($this->parameters)) {
                     // call the method and pass arguments to it
                     call_user_func_array(array($this->controller, $this->action_name), $this->parameters);
                 } else {
@@ -56,7 +56,7 @@ class Application {
      * Get and split the URL
      */
     private function splitUrl() {
-        if(Request::get('url')) {
+        if (Request::get('url')) {
 
             // split URL
             $url = trim(Request::get('url'), '/');
@@ -81,7 +81,7 @@ class Application {
      */
     private function createControllerAndActionNames() {
         // check for controller: no controller given ? then make controller = default controller (from config)
-        if(!$this->controller_name) {
+        if (!$this->controller_name) {
             $this->controller_name = DEFAULT_CONTROLLER;
         }
 

@@ -3,6 +3,7 @@
 class AvatarModel {
     public static $writeAvatarToDBQuery = null;
     public static $deleteAvatarQuery = null;
+
     /**
      * Gets a gravatar image link from given email address
      *
@@ -20,7 +21,7 @@ class AvatarModel {
      * @return string
      */
     public static function getGravatarLinkByEmail($email) {
-        return 'http://www.gravatar.com/avatar/'.md5(strtolower(trim($email))).'?s='.Config::get('AVATAR_SIZE').'&d='.Config::get('GRAVATAR_DEFAULT_IMAGESET').'&r='.Config::get('GRAVATAR_RATING');
+        return 'http://www.gravatar.com/avatar/' . md5(strtolower(trim($email))) . '?s=' . Config::get('AVATAR_SIZE') . '&d=' . Config::get('GRAVATAR_DEFAULT_IMAGESET') . '&r=' . Config::get('GRAVATAR_RATING');
     }
 
     /**
@@ -47,7 +48,7 @@ class AvatarModel {
         if (AvatarModel::isAvatarFolderWritable() && AvatarModel::validateImageFile()) {
 
             // create a jpg file in the avatar folder, write marker to database
-            $target_file_path = Config::get('PATH_AVATARS').Session::get('user_id');
+            $target_file_path = Config::get('PATH_AVATARS') . Session::get('user_id');
             AvatarModel::resizeAvatarImage($_FILES['avatar_file']['tmp_name'], $target_file_path, Config::get('AVATAR_SIZE'), Config::get('AVATAR_SIZE'), Config::get('AVATAR_JPEG_QUALITY'));
             AvatarModel::writeAvatarToDatabase(Session::get('user_id'));
             Session::set('user_avatar_file', AvatarModel::getPublicUserAvatarFilePathByUserId(Session::get('user_id')));

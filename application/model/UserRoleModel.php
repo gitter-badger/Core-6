@@ -10,6 +10,7 @@ class UserRoleModel {
     public static $getPermsQuery = null;
     public static $getPermQuery = null;
     public static $removePermQuery = null;
+
     /**
      * Adding A permission!
      * @param $user_id

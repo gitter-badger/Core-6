@@ -10,6 +10,7 @@ class LoginModel {
     public static $resetFailedLoginQuery = null;
     public static $saveTimeOfLoginQuery = null;
     public static $setRememberMeTokenQuery = null;
+
     /**
      * Login process (for DEFAULT user accounts).
      *
@@ -29,12 +30,12 @@ class LoginModel {
         // checks if user exists, if login is not blocked (due to failed logins) and if password fits the hash
         $result = self::validateAndGetUser($user_name, $user_password);
 
-        if(!$result) {
+        if (!$result) {
             return false;
         }
 
         // reset the failed login counter for that user (if necessary)
-        if($result->user_last_failed_login > 0) {
+        if ($result->user_last_failed_login > 0) {
             self::resetFailedLoginCounterOfUser($result->user_name);
         }
 
@@ -42,7 +43,7 @@ class LoginModel {
         self::saveTimestampOfLoginOfUser($result->user_name);
 
         // if user has checked the "remember me" checkbox, then write token into database and into cookie
-        if($set_remember_me_cookie) {
+        if ($set_remember_me_cookie) {
             self::setRememberMeInDatabaseAndCookie($result->user_id);
         }
 
@@ -76,7 +77,7 @@ class LoginModel {
         $result = UserModel::getUserDataByUsername($user_name);
 
         // Check if that user exists. We don't give back a cause in the feedback to avoid giving an attacker details.
-        if(!$result) {
+        if (!$result) {
             Session::add('feedback_negative', Text::get('FEEDBACK_LOGIN_FAILED'));
             return false;
         }
@@ -88,7 +89,7 @@ class LoginModel {
         }
 
         // if hash of provided password does NOT match the hash in the database: +1 failed-login counter
-        if(!password_verify($user_password, $result->user_password_hash)) {
+        if (!password_verify($user_password, $result->user_password_hash)) {
             self::incrementFailedLoginCounterOfUser($result->user_name);
             // we say "password wrong" here, but less details like "login failed" would be better (= less information)
             Session::add('feedback_negative', Text::get('FEEDBACK_PASSWORD_WRONG'));
@@ -106,7 +107,7 @@ class LoginModel {
         }
 
         // if user is not active (= has not verified account by verification mail)
-        if($result->user_active != 1) {
+        if ($result->user_active != 1) {
             Session::add('feedback_negative', Text::get('FEEDBACK_ACCOUNT_NOT_ACTIVATED_YET'));
             if (Config::get('CASTLE_ENABLED')) {
                 Castle::setApiKey(Config::get('CASTLE_SECRET'));
@@ -134,56 +135,73 @@ class LoginModel {
     }
 
     /**
-     * performs the login via cookie (for DEFAULT user account, FACEBOOK-accounts are handled differently)
-     * TODO add throttling here ?
+     * Increments the failed-login counter of a user
      *
-     * @param $cookie string The cookie "remember_me"
-     *
-     * @return bool success state
+     * @param $user_name
      */
-    public static function loginWithCookie($cookie) {
-        if(!$cookie) {
-            Session::add('feedback_negative', Text::get('FEEDBACK_COOKIE_INVALID'));
-            return false;
+    public static function incrementFailedLoginCounterOfUser($user_name) {
+        if (self::$addFailedLoginQuery === null) {
+            self::$addFailedLoginQuery = DatabaseFactory::getFactory()->getConnection()->prepare("UPDATE users
+                   SET user_failed_logins = user_failed_logins+1, user_last_failed_login = :user_last_failed_login
+                 WHERE user_name = :user_name OR user_email = :user_name
+                 LIMIT 1");
         }
-
-        // check cookie's contents, check if cookie contents belong together or token is empty
-        list ($user_id, $token, $hash) = explode(':', $cookie);
-        if ($hash !== hash('sha256', $user_id . ':' . $token) or empty($token)) {
-            Session::add('feedback_negative', Text::get('FEEDBACK_COOKIE_INVALID'));
-            return false;
-        }
-
-        // get data of user that has this id and this token
-        $result = UserModel::getUserDataByUserIdAndToken($user_id, $token);
-        if($result) {
-            // successfully logged in, so we write all necessary data into the session and set "user_logged_in" to true
-            self::setSuccessfulLoginIntoSession($result->user_id, $result->user_name, $result->user_email, $result->user_account_type);
-            // save timestamp of this login in the database line of that user
-            self::saveTimestampOfLoginOfUser($result->user_name);
-
-            Session::add('feedback_positive', Text::get('FEEDBACK_COOKIE_LOGIN_SUCCESSFUL'));
-            return true;
-        } else {
-            Session::add('feedback_negative', Text::get('FEEDBACK_COOKIE_INVALID'));
-            return false;
-        }
+        self::$addFailedLoginQuery->execute(array(':user_name' => $user_name, ':user_last_failed_login' => time()));
     }
 
     /**
-     * Log out process: delete cookie, delete session
+     * Resets the failed-login counter of a user back to 0
+     *
+     * @param $user_name
      */
-    public static function logout() {
-        if (Config::get('CASTLE_ENABLED')) {
-            Castle::setApiKey(Config::get('CASTLE_SECRET'));
-            Castle::logout();
-            Castle::track(array(
-                'name' => '$logout.succeeded',
-                'user_id' => Session::get('user_id')
-            ));
+    public static function resetFailedLoginCounterOfUser($user_name) {
+        if (self::$resetFailedLoginQuery === null) {
+            self::$resetFailedLoginQuery = DatabaseFactory::getFactory()->getConnection()->prepare("UPDATE users
+                   SET user_failed_logins = 0, user_last_failed_login = NULL
+                 WHERE user_name = :user_name AND user_failed_logins != 0
+                 LIMIT 1");
         }
-        self::deleteCookie();
-        Session::destroy();
+        self::$resetFailedLoginQuery->execute(array(':user_name' => $user_name));
+    }
+
+    /**
+     * Write timestamp of this login into database (we only write a "real" login via login form into the database,
+     * not the session-login on every page request
+     *
+     * @param $user_name
+     */
+    public static function saveTimestampOfLoginOfUser($user_name) {
+        if (self::$saveTimeOfLoginQuery === null) {
+            self::$saveTimeOfLoginQuery = DatabaseFactory::getFactory()->getConnection()->prepare("UPDATE users SET user_last_login_timestamp = :user_last_login_timestamp
+                WHERE user_name = :user_name LIMIT 1");
+        }
+        self::$saveTimeOfLoginQuery->execute(array(':user_name' => $user_name, ':user_last_login_timestamp' => time()));
+    }
+
+    /**
+     * Write remember-me token into database and into cookie
+     * Maybe splitting this into database and cookie part ?
+     *
+     * @param $user_id
+     */
+    public static function setRememberMeInDatabaseAndCookie($user_id) {
+        if (self::$setRememberMeTokenQuery === null) {
+            self::$setRememberMeTokenQuery = DatabaseFactory::getFactory()->getConnection()->prepare("UPDATE users SET user_remember_me_token = :user_remember_me_token WHERE user_id = :user_id LIMIT 1");
+        }
+
+        // generate 64 char random string
+        $random_token_string = hash('sha256', mt_rand());
+
+        // write that token into database
+        self::$setRememberMeTokenQuery->execute(array(':user_remember_me_token' => $random_token_string, ':user_id' => $user_id));
+
+        // generate cookie string that consists of user id, random string and combined hash of both
+        $cookie_string_first_part = $user_id . ':' . $random_token_string;
+        $cookie_string_hash = hash('sha256', $cookie_string_first_part);
+        $cookie_string = $cookie_string_first_part . ':' . $cookie_string_hash;
+
+        // set cookie
+        setcookie('remember_me', $cookie_string, time() + Config::get('COOKIE_RUNTIME'), Config::get('COOKIE_PATH'));
     }
 
     /**
@@ -213,73 +231,56 @@ class LoginModel {
     }
 
     /**
-     * Increments the failed-login counter of a user
+     * performs the login via cookie (for DEFAULT user account, FACEBOOK-accounts are handled differently)
+     * TODO add throttling here ?
      *
-     * @param $user_name
+     * @param $cookie string The cookie "remember_me"
+     *
+     * @return bool success state
      */
-    public static function incrementFailedLoginCounterOfUser($user_name) {
-        if(self::$addFailedLoginQuery === null) {
-            self::$addFailedLoginQuery = DatabaseFactory::getFactory()->getConnection()->prepare("UPDATE users
-                   SET user_failed_logins = user_failed_logins+1, user_last_failed_login = :user_last_failed_login
-                 WHERE user_name = :user_name OR user_email = :user_name
-                 LIMIT 1");
+    public static function loginWithCookie($cookie) {
+        if (!$cookie) {
+            Session::add('feedback_negative', Text::get('FEEDBACK_COOKIE_INVALID'));
+            return false;
         }
-        self::$addFailedLoginQuery->execute(array(':user_name' => $user_name, ':user_last_failed_login' => time()));
+
+        // check cookie's contents, check if cookie contents belong together or token is empty
+        list ($user_id, $token, $hash) = explode(':', $cookie);
+        if ($hash !== hash('sha256', $user_id . ':' . $token) or empty($token)) {
+            Session::add('feedback_negative', Text::get('FEEDBACK_COOKIE_INVALID'));
+            return false;
+        }
+
+        // get data of user that has this id and this token
+        $result = UserModel::getUserDataByUserIdAndToken($user_id, $token);
+        if ($result) {
+            // successfully logged in, so we write all necessary data into the session and set "user_logged_in" to true
+            self::setSuccessfulLoginIntoSession($result->user_id, $result->user_name, $result->user_email, $result->user_account_type);
+            // save timestamp of this login in the database line of that user
+            self::saveTimestampOfLoginOfUser($result->user_name);
+
+            Session::add('feedback_positive', Text::get('FEEDBACK_COOKIE_LOGIN_SUCCESSFUL'));
+            return true;
+        } else {
+            Session::add('feedback_negative', Text::get('FEEDBACK_COOKIE_INVALID'));
+            return false;
+        }
     }
 
     /**
-     * Resets the failed-login counter of a user back to 0
-     *
-     * @param $user_name
+     * Log out process: delete cookie, delete session
      */
-    public static function resetFailedLoginCounterOfUser($user_name) {
-        if(self::$resetFailedLoginQuery === null) {
-            self::$resetFailedLoginQuery = DatabaseFactory::getFactory()->getConnection()->prepare("UPDATE users
-                   SET user_failed_logins = 0, user_last_failed_login = NULL
-                 WHERE user_name = :user_name AND user_failed_logins != 0
-                 LIMIT 1");
+    public static function logout() {
+        if (Config::get('CASTLE_ENABLED')) {
+            Castle::setApiKey(Config::get('CASTLE_SECRET'));
+            Castle::logout();
+            Castle::track(array(
+                'name' => '$logout.succeeded',
+                'user_id' => Session::get('user_id')
+            ));
         }
-        self::$resetFailedLoginQuery->execute(array(':user_name' => $user_name));
-    }
-
-    /**
-     * Write timestamp of this login into database (we only write a "real" login via login form into the database,
-     * not the session-login on every page request
-     *
-     * @param $user_name
-     */
-    public static function saveTimestampOfLoginOfUser($user_name) {
-        if(self::$saveTimeOfLoginQuery === null) {
-            self::$saveTimeOfLoginQuery = DatabaseFactory::getFactory()->getConnection()->prepare("UPDATE users SET user_last_login_timestamp = :user_last_login_timestamp
-                WHERE user_name = :user_name LIMIT 1");
-        }
-        self::$saveTimeOfLoginQuery->execute(array(':user_name' => $user_name, ':user_last_login_timestamp' => time()));
-    }
-
-    /**
-     * Write remember-me token into database and into cookie
-     * Maybe splitting this into database and cookie part ?
-     *
-     * @param $user_id
-     */
-    public static function setRememberMeInDatabaseAndCookie($user_id) {
-        if(self::$setRememberMeTokenQuery === null) {
-            self::$setRememberMeTokenQuery = DatabaseFactory::getFactory()->getConnection()->prepare("UPDATE users SET user_remember_me_token = :user_remember_me_token WHERE user_id = :user_id LIMIT 1");
-        }
-
-        // generate 64 char random string
-        $random_token_string = hash('sha256', mt_rand());
-
-        // write that token into database
-        self::$setRememberMeTokenQuery->execute(array(':user_remember_me_token' => $random_token_string, ':user_id' => $user_id));
-
-        // generate cookie string that consists of user id, random string and combined hash of both
-        $cookie_string_first_part = $user_id . ':' . $random_token_string;
-        $cookie_string_hash = hash('sha256', $cookie_string_first_part);
-        $cookie_string = $cookie_string_first_part . ':' . $cookie_string_hash;
-
-        // set cookie
-        setcookie('remember_me', $cookie_string, time() + Config::get('COOKIE_RUNTIME'), Config::get('COOKIE_PATH'));
+        self::deleteCookie();
+        Session::destroy();
     }
 
     /**

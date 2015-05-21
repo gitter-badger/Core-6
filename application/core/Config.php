@@ -29,22 +29,6 @@ class Config {
     }
 
     /**
-     * Set a Config option in the Database
-     * @param $key
-     * @param $setting
-     */
-    public static function set($key, $setting) {
-        if (Cache::has($key)) {
-            Cache::forget($key);
-        }
-
-        if(self::$setQuery === null) {
-            self::$setQuery = DatabaseFactory::getFactory()->getConnection()->prepare("UPDATE settings SET `value` = :setting WHERE `key` = :key");
-        }
-        self::$setQuery->execute(array(':key' => $key, ':setting' => $setting));
-    }
-
-    /**
      * Ensures that the returned results are indeed booleans | strings | int | float
      * @param $key
      * @return bool|int|float|string
@@ -59,5 +43,21 @@ class Config {
         } else {
             return $key;
         }
+    }
+
+    /**
+     * Set a Config option in the Database
+     * @param $key
+     * @param $setting
+     */
+    public static function set($key, $setting) {
+        if (Cache::has($key)) {
+            Cache::forget($key);
+        }
+
+        if (self::$setQuery === null) {
+            self::$setQuery = DatabaseFactory::getFactory()->getConnection()->prepare("UPDATE settings SET `value` = :setting WHERE `key` = :key");
+        }
+        self::$setQuery->execute(array(':key' => $key, ':setting' => $setting));
     }
 }

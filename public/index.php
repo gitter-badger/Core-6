@@ -15,7 +15,7 @@ if (!file_exists('../vendor/autoload.php')) {
     echo 'It seems that you forgot to run composer update!';
 } else {
     require '../vendor/autoload.php';
-    require '../application/config/config.'.Environment::get().'.php';
+    require '../application/config/config.' . Environment::get() . '.php';
 }
 
 use Tracy\Debugger;

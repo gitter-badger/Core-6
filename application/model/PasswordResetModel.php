@@ -9,6 +9,7 @@ class PasswordResetModel {
     public static $setPasswordResetToken = null;
     public static $verifyPasswordQuery = null;
     public static $saveNewPasswordQuery = null;
+
     /**
      * Perform the necessary actions to send a password reset mail
      *
@@ -101,7 +102,7 @@ class PasswordResetModel {
             return true;
         }
 
-        Session::add('feedback_negative', Text::get('FEEDBACK_PASSWORD_RESET_MAIL_SENDING_ERROR').$mail->getError());
+        Session::add('feedback_negative', Text::get('FEEDBACK_PASSWORD_RESET_MAIL_SENDING_ERROR') . $mail->getError());
         return false;
     }
 
@@ -145,30 +146,6 @@ class PasswordResetModel {
             Session::add('feedback_negative', Text::get('FEEDBACK_PASSWORD_RESET_LINK_EXPIRED'));
             return false;
         }
-    }
-
-    /**
-     * Writes the new password to the database
-     *
-     * @param string $user_name username
-     * @param string $user_password_hash
-     * @param string $user_password_reset_hash
-     *
-     * @return bool
-     */
-    public static function saveNewUserPassword($user_name, $user_password_hash, $user_password_reset_hash) {
-        if (self::$saveNewPasswordQuery === null) {
-            self::$saveNewPasswordQuery = DatabaseFactory::getFactory()
-                ->getConnection()
-                ->prepare("UPDATE users SET user_password_hash = :user_password_hash, user_password_reset_hash = NULL,
-                       user_password_reset_timestamp = NULL
-                 WHERE user_name = :user_name AND user_password_reset_hash = :user_password_reset_hash
-                       AND user_provider_type = :user_provider_type LIMIT 1");
-        }
-        self::$saveNewPasswordQuery->execute(array(':user_password_hash' => $user_password_hash, ':user_name' => $user_name, ':user_password_reset_hash' => $user_password_reset_hash, ':user_provider_type' => 'DEFAULT'));
-
-        // if one result exists, return true, else false. Could be written even shorter btw.
-        return (self::$saveNewPasswordQuery->rowCount() == 1 ? true : false);
     }
 
     /**
@@ -232,5 +209,29 @@ class PasswordResetModel {
         }
 
         return true;
+    }
+
+    /**
+     * Writes the new password to the database
+     *
+     * @param string $user_name username
+     * @param string $user_password_hash
+     * @param string $user_password_reset_hash
+     *
+     * @return bool
+     */
+    public static function saveNewUserPassword($user_name, $user_password_hash, $user_password_reset_hash) {
+        if (self::$saveNewPasswordQuery === null) {
+            self::$saveNewPasswordQuery = DatabaseFactory::getFactory()
+                ->getConnection()
+                ->prepare("UPDATE users SET user_password_hash = :user_password_hash, user_password_reset_hash = NULL,
+                       user_password_reset_timestamp = NULL
+                 WHERE user_name = :user_name AND user_password_reset_hash = :user_password_reset_hash
+                       AND user_provider_type = :user_provider_type LIMIT 1");
+        }
+        self::$saveNewPasswordQuery->execute(array(':user_password_hash' => $user_password_hash, ':user_name' => $user_name, ':user_password_reset_hash' => $user_password_reset_hash, ':user_provider_type' => 'DEFAULT'));
+
+        // if one result exists, return true, else false. Could be written even shorter btw.
+        return (self::$saveNewPasswordQuery->rowCount() == 1 ? true : false);
     }
 }
