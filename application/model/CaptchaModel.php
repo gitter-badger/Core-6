@@ -37,4 +37,14 @@ class CaptchaModel {
 
         return false;
     }
+
+    public static function checkRecaptcha($gRecapthcaResponse) {
+        $recaptcha = new \ReCaptcha\ReCaptcha(Config::get('RECAPTCHA_SECRET'));
+        $resp = $recaptcha->verify($gRecapthcaResponse, Request::server('REMOTE_ADDR'));
+        if ($resp->isSuccess()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

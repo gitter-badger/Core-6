@@ -19,7 +19,8 @@
     "phpfastcache/phpfastcache": "~3.0",
     "tracy/tracy": "*",
     "castle/castle-php": "1.2.0",
-    "lichtner/fluentpdo": "dev-master"
+    "lichtner/fluentpdo": "dev-master",
+    "google/recaptcha": "~1.1"
   },
   "autoload": {
     "psr-4": {

@@ -46,4 +46,10 @@ class Request {
             return $_COOKIE[$key];
         }
     }
+
+    public static function server($key) {
+        if (isset($_SERVER[$key])) {
+            return $_SERVER[$key];
+        }
+    }
 }
