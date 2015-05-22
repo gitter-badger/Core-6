@@ -145,8 +145,6 @@ class View {
      */
     public function renderFeedbackMessages() {
         require PATH_VIEW.'_templates/feedback.php';
-
-        // delete these messages (as they are not needed anymore and we want to avoid to show them twice
         Session::set('feedback_positive', null);
         Session::set('feedback_negative', null);
     }

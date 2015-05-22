@@ -9,9 +9,7 @@ class ErrorController extends Controller {
      * Construct this object by extending the basic Controller class
      */
     public function __construct() {
-        //@todo add without header and foter to make sure that normal users dont see ui. 
         parent::__construct();
-        Auth::checkAuthentication();
     }
 
     /**
@@ -19,6 +17,14 @@ class ErrorController extends Controller {
      */
     public function index() {
         header('HTTP/1.0 404 Not Found');
-        $this->View->render('error/index');
+        $this->View->renderWithoutHeaderAndFooter('error/index');
+    }
+
+    /**
+     * Controls what happens when a user is forbidden (403)
+     */
+    public function forbidden() {
+        header('HTTP/1.0 403 Forbidden');
+        $this->View->renderWithoutHeaderAndFooter('error/forbidden');
     }
 }

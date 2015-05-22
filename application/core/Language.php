@@ -1,9 +1,9 @@
 <?php
 
 /**
- * class language
- * provides specific language texts.
- * @todo lots of stuff left to be done!
+ * class Language
+ * provides specific language texts based on user preferences (if logged in and set).
+ *
  */
 class Language {
 

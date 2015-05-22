@@ -16,13 +16,6 @@ class DashboardController extends Controller {
      * This method controls what happens when you move to /dashboard/index in your app.
      */
     public function index() {
-        $this->View->render('dashboard/index', array(
-            'item_count' => DataModel::getRowCount("item"),
-            'status_count' => DataModel::getRowCount('status'),
-            'location_count' => DataModel::getRowCount("location"),
-            'utilization_count' => DataModel::getRowCount('utilization'),
-            'lev_count' => DataModel::getRowCount("lev"),
-            'count_count' => DataModel::getRowCount('count'),
-        ));
+        $this->View->render('dashboard/index');
     }
 }
