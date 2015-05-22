@@ -11,7 +11,7 @@
                 <h2>Login here</h2>
 
                 <form action="<?php echo URL; ?>login/login" method="post">
-                    <input type="text" name="user_name" placeholder="Username or email" required/>
+                    <input type="text" name="user_name" placeholder="Username or email"/>
                     <input type="password" name="user_password" placeholder="Password" required/>
                     <label for="set_remember_me_cookie" class="remember-me-label">
                         <input type="checkbox" name="set_remember_me_cookie" class="remember-me-checkbox"/>

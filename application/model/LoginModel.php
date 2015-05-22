@@ -23,7 +23,7 @@ class LoginModel {
     public static function login($user_name, $user_password, $set_remember_me_cookie = null) {
         // we do negative-first checks here, for simplicity empty username and empty password in one line
         if(empty($user_name) or empty($user_password)) {
-            Session::add('feedback_negative', Text::get('FEEDBACK_USERNAME_OR_PASSWORD_FIELD_EMPTY'));
+            Session::add('feedback_negative', Language::getText('login-empty-field'));
             return false;
         }
 
@@ -78,21 +78,20 @@ class LoginModel {
 
         // Check if that user exists. We don't give back a cause in the feedback to avoid giving an attacker details.
         if(!$result) {
-            Session::add('feedback_negative', Text::get('FEEDBACK_LOGIN_FAILED'));
+            Session::add('feedback_negative', Language::getText('login-failed'));
             return false;
         }
 
         // block login attempt if somebody has already failed 3 times and the last login attempt is less than 30sec ago
         if(($result->user_failed_logins >= 3) && ($result->user_last_failed_login > (time() - 30))) {
-            Session::add('feedback_negative', Text::get('FEEDBACK_PASSWORD_WRONG_3_TIMES'));
+            Session::add('feedback_negative', Language::getText('login-wrong-3'));
             return false;
         }
 
         // if hash of provided password does NOT match the hash in the database: +1 failed-login counter
         if(!password_verify($user_password, $result->user_password_hash)) {
             self::incrementFailedLoginCounterOfUser($result->user_name);
-            // we say "password wrong" here, but less details like "login failed" would be better (= less information)
-            Session::add('feedback_negative', Text::get('FEEDBACK_PASSWORD_WRONG'));
+            Session::add('feedback_negative', Language::getText('login-failed'));
             if(Config::get('CASTLE_ENABLED')) {
                 Castle::setApiKey(Config::get('CASTLE_SECRET'));
                 Castle::track(array(
@@ -108,7 +107,7 @@ class LoginModel {
 
         // if user is not active (= has not verified account by verification mail)
         if($result->user_active != 1) {
-            Session::add('feedback_negative', Text::get('FEEDBACK_ACCOUNT_NOT_ACTIVATED_YET'));
+            Session::add('feedback_negative', Language::getText('login-verification'));
             if(Config::get('CASTLE_ENABLED')) {
                 Castle::setApiKey(Config::get('CASTLE_SECRET'));
                 Castle::track(array(
@@ -240,14 +239,14 @@ class LoginModel {
      */
     public static function loginWithCookie($cookie) {
         if(!$cookie) {
-            Session::add('feedback_negative', Text::get('FEEDBACK_COOKIE_INVALID'));
+            Session::add('feedback_negative', Language::getText('login-cookie-invalid'));
             return false;
         }
 
         // check cookie's contents, check if cookie contents belong together or token is empty
         list ($user_id, $token, $hash) = explode(':', $cookie);
         if($hash !== hash('sha256', $user_id.':'.$token) or empty($token)) {
-            Session::add('feedback_negative', Text::get('FEEDBACK_COOKIE_INVALID'));
+            Session::add('feedback_negative', Language::getText('login-cookie-invalid'));
             return false;
         }
 
@@ -259,10 +258,10 @@ class LoginModel {
             // save timestamp of this login in the database line of that user
             self::saveTimestampOfLoginOfUser($result->user_name);
 
-            Session::add('feedback_positive', Text::get('FEEDBACK_COOKIE_LOGIN_SUCCESSFUL'));
+            Session::add('feedback_positive', Language::getText('login-cookie-success'));
             return true;
         } else {
-            Session::add('feedback_negative', Text::get('FEEDBACK_COOKIE_INVALID'));
+            Session::add('feedback_negative', Language::getText('login-cookie-invalid'));
             return false;
         }
     }

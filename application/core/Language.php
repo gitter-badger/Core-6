@@ -26,14 +26,14 @@ class Language {
     public static function getText($textID) {
         $userLang = self::getUserLanguage(Session::get('user_id'));
         // If the user's language is set to null
-        if (!isset($userLang)) {
-            $language_file = self::getDefaultLang() . self::$file;
-            $array = json_decode($language_file, true);
+        if ($userLang === null) {
+            $language_file = dirname(dirname(__FILE__)) . '/language/' . self::getDefaultLang() . self::$file;
+            $array = json_decode(file_get_contents($language_file), true);
             return $array[$textID];
         } else {
             // If the user's language is set.
-            $language_file = self::getUserLanguage(Session::get('user_id')) . self::$file;
-            $array = json_decode($language_file, true);
+            $language_file = dirname(dirname(__FILE__)) . '/language/' . self::getUserLanguage(Session::get('user_id')) . self::$file;
+            $array = json_decode(file_get_contents($language_file), true);
             return $array[$textID];
         }
     }

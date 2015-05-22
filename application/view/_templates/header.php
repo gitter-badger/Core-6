@@ -21,12 +21,13 @@
             _castle('setAccount', '<?php echo Config::get('CASTLE_ID'); ?>');
             <?php if(Session::get('user_logged_in')) { ?>
             _castle('setUser', {
-                id: <?php echo Session::get('user_id'); ?>, // required
-                name: '<?php echo Session::get('user_name'); ?>', // optional
-                email: '<?php echo Session::get('user_email')?>' // optional
+                id: <?php echo Session::get('user_id'); ?>,
+                name: '<?php echo Session::get('user_name'); ?>',
+                email: '<?php echo Session::get('user_email')?>'
             });
             <?php } ?>
             _castle('trackPageview');
         </script>
     <?php } ?>
 </head>
+<body>
