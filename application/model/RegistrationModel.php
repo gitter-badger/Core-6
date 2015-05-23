@@ -22,7 +22,11 @@ class RegistrationModel {
         $user_password_repeat = Request::post('user_password_repeat');
 
         // stop registration flow if registrationInputValidation() returns false (= anything breaks the input check rules)
-        $validation_result = RegistrationModel::registrationInputValidation(Request::post('captcha'), $user_name, $user_password_new, $user_password_repeat, $user_email);
+        if (Config::get('RECAPTCHA_ENABLED')) {
+            $validation_result = RegistrationModel::registrationInputValidation(Request::post('g-recaptcha-response'), $user_name, $user_password_new, $user_password_repeat, $user_email);
+        } else {
+            $validation_result = RegistrationModel::registrationInputValidation(Request::post('captcha'), $user_name, $user_password_new, $user_password_repeat, $user_email);
+        }
         if(!$validation_result) {
             return false;
         }
@@ -83,10 +87,16 @@ class RegistrationModel {
      * @return bool
      */
     public static function registrationInputValidation($captcha, $user_name, $user_password_new, $user_password_repeat, $user_email) {
-        // perform all necessary checks
-        if(!CaptchaModel::checkCaptcha($captcha)) {
-            Session::add('feedback_negative', Text::get('FEEDBACK_CAPTCHA_WRONG'));
-            return false;
+        if (Config::get('RECAPTCHA_ENABLED')) {
+            if (!CaptchaModel::checkRecaptcha($captcha)) {
+                Session::add('feedback_negative', Language::getText('captcha-wrong'));
+                return false;
+            }
+        } else {
+            if (!CaptchaModel::checkCaptcha($captcha)) {
+                Session::add('feedback_negative', Text::get('FEEDBACK_CAPTCHA_WRONG'));
+                return false;
+            }
         }
 
         // if username, email and password are all correctly validated

@@ -5,5 +5,6 @@
   "login-wrong-3": "Your Password was wrong three times!",
   "login-verification": "You must activate your account before you can login!",
   "login-cookie-invalid": "The Login Cookie was invalid!",
-  "login-cookie-success": "Successfully logged in using your cookie!"
+  "login-cookie-success": "Successfully logged in using your cookie!",
+  "captcha-wrong": "The Captcha Entered was incorrect. Please try again."
 }

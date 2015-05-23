@@ -38,9 +38,14 @@ class CaptchaModel {
         return false;
     }
 
-    public static function checkRecaptcha($gRecapthcaResponse) {
+    /**
+     * Check Google ReCaptcha
+     * @param $gReCaptchaResponse
+     * @return bool
+     */
+    public static function checkRecaptcha($gReCaptchaResponse) {
         $recaptcha = new \ReCaptcha\ReCaptcha(Config::get('RECAPTCHA_SECRET'));
-        $resp = $recaptcha->verify($gRecapthcaResponse, Request::server('REMOTE_ADDR'));
+        $resp = $recaptcha->verify($gReCaptchaResponse, Request::server('REMOTE_ADDR'));
         if ($resp->isSuccess()) {
             return true;
         } else {
