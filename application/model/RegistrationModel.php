@@ -22,7 +22,7 @@ class RegistrationModel {
         $user_password_repeat = Request::post('user_password_repeat');
 
         // stop registration flow if registrationInputValidation() returns false (= anything breaks the input check rules)
-        if (Config::get('RECAPTCHA_ENABLED')) {
+        if(Config::get('RECAPTCHA_ENABLED')) {
             $validation_result = RegistrationModel::registrationInputValidation(Request::post('g-recaptcha-response'), $user_name, $user_password_new, $user_password_repeat, $user_email);
         } else {
             $validation_result = RegistrationModel::registrationInputValidation(Request::post('captcha'), $user_name, $user_password_new, $user_password_repeat, $user_email);
