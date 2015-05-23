@@ -39,6 +39,10 @@
             <br>
 
             <p>capthca:</p>
+            <?php if (Config::get('RECAPTCHA_ENABLED')) { ?>
+                <div class="g-recaptcha" data-sitekey="<?php echo Config::get('RECAPTCHA_SITEKEY'); ?>"></div>
+                <script src="https://www.google.com/recaptcha/api.js"></script>
+            <?php } else { ?>
             <br><img id="captcha" src="<?php echo URL; ?>login/showCaptcha"/>
             <br><input type="text" name="captcha" placeholder="Please enter above characters" required/>
 
@@ -46,6 +50,7 @@
             <a href="#" style="display: block; font-size: 11px; margin: 5px 0 15px 0; text-align: center"
                onclick="document.getElementById('captcha').src = '<?php echo URL; ?>login/showCaptcha?' + Math.random(); return false">Reload
                 Captcha</a>
+            <?php } ?>
 
             <input type="submit" value="Register"/>
         </form>

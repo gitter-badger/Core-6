@@ -94,7 +94,7 @@ class RegistrationModel {
             }
         } else {
             if (!CaptchaModel::checkCaptcha($captcha)) {
-                Session::add('feedback_negative', Text::get('FEEDBACK_CAPTCHA_WRONG'));
+                Session::add('feedback_negative', Language::getText('captcha-wrong'));
                 return false;
             }
         }
