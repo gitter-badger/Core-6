@@ -48,7 +48,7 @@ class Request {
     }
 
     public static function server($key) {
-        if (isset($_SERVER[$key])) {
+        if(isset($_SERVER[$key])) {
             return $_SERVER[$key];
         }
     }

@@ -26,13 +26,13 @@ class Language {
     public static function getText($textID) {
         $userLang = self::getUserLanguage(Session::get('user_id'));
         // If the user's language is set to null
-        if ($userLang === null) {
-            $language_file = dirname(dirname(__FILE__)) . '/language/' . self::getDefaultLang() . self::$file;
+        if($userLang === null) {
+            $language_file = dirname(dirname(__FILE__)).'/language/'.self::getDefaultLang().self::$file;
             $array = json_decode(file_get_contents($language_file), true);
             return $array[$textID];
         } else {
             // If the user's language is set.
-            $language_file = dirname(dirname(__FILE__)) . '/language/' . self::getUserLanguage(Session::get('user_id')) . self::$file;
+            $language_file = dirname(dirname(__FILE__)).'/language/'.self::getUserLanguage(Session::get('user_id')).self::$file;
             $array = json_decode(file_get_contents($language_file), true);
             return $array[$textID];
         }
@@ -44,10 +44,10 @@ class Language {
      * @return mixed|null
      */
     public static function getUserLanguage($userID = null) {
-        if ($userID === null) {
+        if($userID === null) {
             return null;
         } else {
-            if (self::$userLangQuery === null) {
+            if(self::$userLangQuery === null) {
                 self::$userLangQuery = DatabaseFactory::getFactory()
                     ->getConnection()
                     ->prepare('SELECT user_lang FROM users WHERE user_id = :user_id');

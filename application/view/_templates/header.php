@@ -2,7 +2,7 @@
 <html>
 <head>
     <title><?php echo Config::get('SITE_NAME'); ?></title>
-    <?php if (Config::get('CASTLE_ENABLED')) { ?>
+    <?php if(Config::get('CASTLE_ENABLED')) { ?>
         <script type="text/javascript">
             (function (e, t, n, r) {
                 function i(e, n) {

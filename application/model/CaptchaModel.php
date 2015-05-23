@@ -46,7 +46,7 @@ class CaptchaModel {
     public static function checkRecaptcha($gReCaptchaResponse) {
         $recaptcha = new \ReCaptcha\ReCaptcha(Config::get('RECAPTCHA_SECRET'));
         $resp = $recaptcha->verify($gReCaptchaResponse, Request::server('REMOTE_ADDR'));
-        if ($resp->isSuccess()) {
+        if($resp->isSuccess()) {
             return true;
         } else {
             return false;
