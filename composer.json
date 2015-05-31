@@ -1,5 +1,5 @@
 {
-  "name": "panique/huge",
+  "name": "trackingteam/mvc-framework",
   "type": "project",
   "description": "A full-feature user authentication / login system embedded into a simple but powerful MVC framework structure",
   "keywords": [
@@ -10,7 +10,7 @@
     "mvc",
     "membership"
   ],
-  "homepage": "https://github.com/panique/huge",
+  "homepage": "https://github.com/TrackingTeam/MVC-Framework",
   "license": "MIT",
   "require-dev": {
     "php": ">=5.5.0",
