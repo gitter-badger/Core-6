@@ -1,62 +1,87 @@
 <?php
 
 class LockModel {
+    public static $sendLockToDBQuery = null;
+    public static $deleteFromDBQuery = null;
+    public static $getRefererQuery = null;
 
     /**
-     * lock()
-     * locks users session and stores refer page in database
+     * Lock User
      */
     public static function lock() {
-        $server_refer = $_SERVER['HTTP_REFERER'];
-
-        $db = DatabaseFactory::getFactory()->fluentPDO();
-        $values = array(
+        $user_info = array(
             'user_id' => Session::get('user_id'),
             'user_name' => Session::get('user_name'),
+            'user_email' => Session::get('user_email')
         );
-        $query = $db->from('user_lock')->where($values);
-        $query->execute();
-
-        if(strpos($server_refer, 'lock') !== false) {
-            $refer = 'dashboard';
-        } else {
-            $string = $server_refer;
-            $search = URL;
-            $refer = str_replace($string, '', $search);
-        }
-
-        $values = null;
-        $values = array(
-            'user_id' => Session::get('user_id'),
-            'user_name' => Session::get('user_name'),
-            'refer_page' => $refer,
-            'session_locked' => 1
-        );
-        $query = $db->insertInto('user_lock', $values);
-        $query->execute();
+        self::sendLockToDB($user_info['user_id'], $user_info['user_name'], Request::server('HTTP_REFERER'));
+        Session::destroy();
+        Session::set('user_name', $user_info['user_name']);
+        Session::set('user_email', $user_info['user_email']);
         Session::set('locked', true);
+        Redirect::to('lock');
     }
 
-    public static function unlock() {
-        $db = DatabaseFactory::getFactory()->fluentPDO();
-        $values = array(
-            'user_id' => Session::get('user_id'),
-            'user_name' => Session::get('user_name'),
+    public static function unlock($user_id, $username, $password) {
+        if (LoginModel::login($username, $password)) {
+            Redirect::referer(self::getReferer($user_id, $username));
+        } else {
+            Redirect::to('lock');
+        }
+    }
+
+    /**
+     * Send User info to DB
+     * @param $user_id
+     * @param $username
+     * @param $refer_page
+     */
+    public static function sendLockToDB($user_id, $username, $refer_page) {
+        if (self::$sendLockToDBQuery === null) {
+            self::$sendLockToDBQuery = DatabaseFactory::getFactory()
+                ->getConnection()
+                ->prepare('INSERT INTO `user_lock` (`user_id`, `user_name`, `refer_page`, `session_locked`) VALUES (:user_id, :user_name, :refer_page, TRUE)');
+        }
+        self::$sendLockToDBQuery->execute(
+            array(
+                'user_id' => $user_id,
+                'user_name' => $username,
+                'refer_page' => $refer_page
+            )
         );
-        $query = $db->from('user_lock')->where($values);
-        $query->execute();
-        $result = $query->fetch();
-        Session::set('locked', false);
-        // dirty manner to turn stdclass to array
-        $refer = json_decode(json_encode($result), true);
-        $db->deleteFrom('user_lock', Session::get('user_id'));
-
-        // needs to be fixed. currently it can make it end up at: http://HOST.COM/inventory/http://HOST.COM/inventory/login/showProfile
-        Redirect::to($refer['refer_page']);
     }
 
+    /**
+     * Delete user from DB after unlocking
+     * @param $user_id
+     * @param $username
+     */
+    public static function deleteFromDB($user_id, $username) {
+        if (self::$deleteFromDBQuery === null) {
+            self::$deleteFromDBQuery = DatabaseFactory::getFactory()
+                ->getConnection()
+                ->prepare('DELETE FROM `user_lock` WHERE `user_id` = :user_id AND `user_name` = :user_name');
+        }
+        self::$deleteFromDBQuery->execute(array('user_id' => $user_id, 'user_name' => $username));
+    }
+
+    /**
+     * Get referer URL
+     */
+    public static function getReferer($user_id, $username) {
+        if (self::$getRefererQuery === null) {
+            self::$getRefererQuery = DatabaseFactory::getFactory()
+                ->getConnection()
+                ->prepare('SELECT `refer_page` FROM `user_lock` WHERE `user_id` = :user_id AND `user_name` = :user_name');
+        }
+        self::$getRefererQuery->execute(array('user_id' => $user_id, 'user_name' => $username));
+        return self::$getRefererQuery->fetch();
+    }
+
+    /**
+     * lockStatus() checks lock status
+     */
     public static function lockStatus() {
         return Session::get('locked');
     }
-
 }

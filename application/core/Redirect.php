@@ -21,4 +21,8 @@ class Redirect {
     public static function to($path) {
         header("location: ".URL.$path);
     }
+
+    public static function referer($url) {
+        header("location: " . $url);
+    }
 }
