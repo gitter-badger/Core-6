@@ -22,7 +22,6 @@ class LockController extends Controller {
     }
 
     public function unlock() {
-        LoginModel::login(Request::post('user_name'), Request::post('user_password'));
-        LockModel::unlock();
+        LockModel::unlock(Session::get('user_id'), Session::get('user_name'), Request::post('password'));
     }
 }
