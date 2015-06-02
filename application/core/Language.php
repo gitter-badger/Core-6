@@ -50,7 +50,7 @@ class Language {
             if(self::$userLangQuery === null) {
                 self::$userLangQuery = DatabaseFactory::getFactory()
                     ->getConnection()
-                    ->prepare('SELECT user_lang FROM users WHERE user_id = :user_id');
+                    ->prepare('SELECT user_language FROM users WHERE user_id = :user_id');
             }
             self::$userLangQuery->execute(array(
                 'user_id' => Session::get('user_id')
