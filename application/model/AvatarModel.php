@@ -216,7 +216,7 @@ class AvatarModel {
         self::$deleteAvatarQuery->bindValue(":user_id", (int) $userId, PDO::PARAM_INT);
         self::$deleteAvatarQuery->execute();
 
-        if($sth->rowCount() == 1) {
+        if(self::$deleteAvatarQuery->rowCount() == 1) {
             Session::set('user_avatar_file', self::getPublicUserAvatarFilePathByUserId($userId));
             Session::add("feedback_positive", Text::get("FEEDBACK_AVATAR_IMAGE_DELETE_SUCCESSFUL"));
             return true;
