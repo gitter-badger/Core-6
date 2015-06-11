@@ -1,0 +1,7 @@
+{
+	"name": "Sample",
+	"slug": "sample",
+	"version": "1.0",
+	"description": "This is the description for the Sample module.",
+	"enabled": true
+}

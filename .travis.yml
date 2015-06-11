@@ -8,6 +8,7 @@ php:
 branches:
   only:
     - master
+	- modular-rewrite
 before_script:
   - wget https://www.phing.info/get/phing-latest.phar
 script:
