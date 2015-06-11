@@ -149,6 +149,11 @@ return [
          * Modules Application Provider
          */
         Caffeinated\Modules\ModulesServiceProvider::class,
+
+        /*
+         * Sentry
+         */
+        Cartalyst\Sentry\SentryServiceProvider::class,
     ],
 
     /*
@@ -196,6 +201,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View'      => Illuminate\Support\Facades\View::class,
         'Module'    => Caffeinated\Modules\Facades\Module::class,
+        'Sentry'    => Cartalyst\Sentry\Facades\Laravel\Sentry::class,
     ],
 
 ];

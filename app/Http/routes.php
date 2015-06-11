@@ -14,3 +14,12 @@
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('register', 'AuthController@getRegister');
+Route::get('login', 'AuthController@getLogin');
+Route::post('register', 'AuthController@postRegister');
+Route::post('login', 'AuthController@postLogin');
+
+Route::group(array('before' => 'auth'), function() {
+    Route::get('admin', 'AdminController@index');
+    Route::get('logout', 'AuthController@logout');
+});
