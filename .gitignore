@@ -7,4 +7,3 @@
 /.idea
 /.idea/workspace.xml
 composer.lock
-/app/Modules/*
