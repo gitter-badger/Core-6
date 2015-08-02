@@ -21,11 +21,8 @@ class AuthController extends Controller {
             'password' => \Input::get('password')
         );
         try {
-            if (\Input::get('remember_me') === true) {
-            } else {
-                $user = \Sentinel::authenticate($credentials, \Input::get('remember_me'));
-                \Sentinel::getUserRepository()->recordLogin($user);
-            }
+            $user = \Sentinel::authenticate($credentials, \Input::get('remember_me'));
+            \Sentinel::getUserRepository()->recordLogin($user);
             if (\Sentinel::check()) {
                 return redirect('/');
             }
