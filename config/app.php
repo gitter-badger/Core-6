@@ -146,14 +146,20 @@ return [
         App\Providers\RouteServiceProvider::class,
 
         /*
-         * Modules Application Provider
+         * Laravel Addons
          */
-        Caffeinated\Modules\ModulesServiceProvider::class,
+        Illuminate\Html\HtmlServiceProvider::class,
 
         /*
-         * Sentry
+         * Authentication Providers
          */
-        Cartalyst\Sentry\SentryServiceProvider::class,
+        Cartalyst\Sentinel\Laravel\SentinelServiceProvider::class,
+
+        /*
+         * Additional Providers
+         */
+        Caffeinated\Modules\ModulesServiceProvider::class,
+        Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
     ],
 
     /*
@@ -200,8 +206,24 @@ return [
         'URL'       => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View'      => Illuminate\Support\Facades\View::class,
+
+        /*
+         * Laravel Optionals
+         */
+        'Form' => Illuminate\Html\FormFacade::class,
+        'HTML' => Illuminate\Html\HtmlFacade::class,
+
+        /*
+         * Authentication
+         */
+        'Activation' => Cartalyst\Sentinel\Laravel\Facades\Activation::class,
+        'Reminder' => Cartalyst\Sentinel\Laravel\Facades\Reminder::class,
+        'Sentinel' => Cartalyst\Sentinel\Laravel\Facades\Sentinel::class,
+
+        /*
+         * Addons
+         */
         'Module'    => Caffeinated\Modules\Facades\Module::class,
-        'Sentry'    => Cartalyst\Sentry\Facades\Laravel\Sentry::class,
     ],
 
 ];

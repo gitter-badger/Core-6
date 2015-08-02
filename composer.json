@@ -1,5 +1,5 @@
 {
-    "name": "TrackingTeam/MVC-Framework",
+    "name": "TrackingTeam/Core",
     "description": "TrackingTeam Modular MVC Framework Designed for TrackingTeam projects",
     "keywords": ["framework", "laravel", "mvc", "modular"],
     "license": "MIT",
@@ -8,13 +8,16 @@
         "php": ">=5.5.9",
         "laravel/framework": "5.1.*",
         "caffeinated/modules": "~2.0",
-        "cartalyst/sentry": "dev-feature/laravel-5"
+        "illuminate/html": "5.*",
+        "cartalyst/sentinel": "2.0.*",
+        "doctrine/dbal": "~2.3"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
         "mockery/mockery": "0.9.*",
         "phpunit/phpunit": "~4.0",
-        "phpspec/phpspec": "~2.1"
+        "phpspec/phpspec": "~2.1",
+        "barryvdh/laravel-ide-helper": "^2.0@dev"
     },
     "autoload": {
         "classmap": [
