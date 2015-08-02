@@ -12,7 +12,7 @@
 */
 
 Route::group(['prefix' => 'sample'], function() {
-	Route::get('/', function() {
-		dd('This is the Sample module index page.');
-	});
+    Route::get('/', function() {
+        dd('This is the Sample module index page.');
+    });
 });
