@@ -56,8 +56,8 @@ class AuthController extends Controller {
                     'username' => \Input::get('username'),
                     'user_id' => $activation['user_id'],
                     'activation_code' => $activation['code'],
-                    'activation_url' => env('URL') . '/auth/activate?' . http_build_query(array('ActivationCode' => $activation['code'], 'UserId' => $activation['user_id'])),
-                ], function ($message) {
+                    'activation_url' => env('URL').'/auth/activate?'.http_build_query(array('ActivationCode' => $activation['code'], 'UserId' => $activation['user_id'])),
+                ], function($message) {
                     $message->from('no-reply@modestmusic.ml', 'Modest Music | Account Services');
                     $message->to(\Input::get('email'));
                 });
@@ -116,8 +116,8 @@ class AuthController extends Controller {
                 'username' => \Input::get('email'),
                 'user_id' => $user->getUserId(),
                 'reset_code' => $reminder['code'],
-                'reset_link' => env('URL') . '/auth/forgotpassword/set?' . http_build_query(array('ResetCode' => $reminder['code'], 'UserId' => $user->getUserId()))
-            ], function ($message) {
+                'reset_link' => env('URL').'/auth/forgotpassword/set?'.http_build_query(array('ResetCode' => $reminder['code'], 'UserId' => $user->getUserId()))
+            ], function($message) {
                 $message->from('no-reply@modestmusic.ml', 'Modest Music | Account Services');
                 $message->to(\Input::get('email'));
             });

@@ -177,7 +177,7 @@ class User extends Model implements RoleableInterface, PermissibleInterface, Per
      */
     public function inRole($role)
     {
-        $role = array_first($this->roles, function ($index, $instance) use ($role) {
+        $role = array_first($this->roles, function($index, $instance) use ($role) {
             if ($role instanceof RoleInterface) {
                 return ($instance->getRoleId() === $role->getRoleId());
             }
