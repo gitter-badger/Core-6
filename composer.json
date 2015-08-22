@@ -1,6 +1,19 @@
 {
   "name": "tracking-team/core",
   "description": "Tracking Team Core Application",
+  "homepage": "https://github.com/TrackingTeam/Core",
+  "authors": [
+    {
+      "name": "tankerkiller125",
+      "homepage": "http://tankerkiller125.ml",
+      "role": "Core Contributor"
+    },
+    {
+      "name": "Arjo (worldmc)",
+      "homepage": "http://worldmc.eu",
+      "role": "Core Contributor"
+    }
+  ],
   "keywords": [
     "framework",
     "laravel",
