@@ -1,9 +1,10 @@
 {
-  "name": "laravel/laravel",
-  "description": "The Laravel Framework.",
+  "name": "TrackingTeam/Core",
+  "description": "Tracking Team Core Application",
   "keywords": [
     "framework",
-    "laravel"
+    "laravel",
+    "core"
   ],
   "license": "MIT",
   "type": "project",
